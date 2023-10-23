@@ -6,14 +6,6 @@ import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 
-# def definir_sistema_pelota(ball_pos, ):
-#     # Define el sistema de lógica difusa para encontrar la pelota
-#     ...
-
-# def definir_sistema_fuerza():
-#     # Define el sistema de lógica difusa para saber la fuerza de pateo
-#     ...
-
 # Inicializar Pygame
 pygame.init()
 
@@ -24,7 +16,7 @@ screen_height = 600
 # Colores
 white = (255, 255, 255)
 red = (255, 0, 0)
-green = (0, 255, 0)
+green = (0, 180, 0)
 
 # Inicializar la pantalla
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -34,7 +26,7 @@ pygame.display.set_caption("Simulación de Robot en el Mundial de Soccer")
 robot_x = 700
 robot_y = 300
 # Posición inicial de la pelota
-pelota_x = 500
+pelota_x = 300
 pelota_y = 200
 # Posición inicial de la porteria objetivo
 porteria_x = 50
@@ -160,8 +152,6 @@ while running:
     pygame.draw.circle(screen, (0,0,0), (int(robot_x), int(robot_y)), 20)
     # Dibujar la pelota
     pygame.draw.circle(screen, red, (int(pelota_x), int(pelota_y)), 10)
-    
-    
 
     distancia_robot_pelota = ((robot_x - pelota_x) ** 2 + (robot_y - pelota_y) ** 2) ** 0.5
 
@@ -172,22 +162,35 @@ while running:
     # Calcular la salida difusa
     sistema.compute()   
 
+    result_1 = ''
+    desplazamiento = 0
+
+    if sistema.output['movimiento'] > 66:
+        result_1= "Correr"
+        desplazamiento = 3
+    elif sistema.output['movimiento'] > 33:
+        result_1= "Trotar"
+        desplazamiento = 2
+    else:
+        result_1= "Caminar"
+        desplazamiento = 1
+
     # Calcular el ángulo entre el robot y la pelota
     angulo = math.atan2(pelota_y - robot_y, pelota_x - robot_x)
 
 
     # Renderizar el texto
-    texto = font.render(f"Accion: {sistema.output['movimiento']:.2f}", True, (0, 0, 0))
+    texto = font.render(f"Accion: {result_1}", True, (0, 0, 0))
     # Mostrar el texto en la pantalla
-    screen.blit(texto, (600, 10))
+    screen.blit(texto, (550, 10))
 
     
 
     if distancia_robot_pelota > 18 and not kicked:
         
         # Calcular las nuevas coordenadas del robot
-        nuevo_x = robot_x + (sistema.output['movimiento']) * math.cos(angulo)
-        nuevo_y = robot_y + (sistema.output['movimiento']) * math.sin(angulo)
+        nuevo_x = robot_x + desplazamiento * math.cos(angulo)
+        nuevo_y = robot_y + desplazamiento * math.sin(angulo)
 
         # Actualizar la posición del robot
         robot_x = nuevo_x
